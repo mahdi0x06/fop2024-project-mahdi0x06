@@ -2,7 +2,35 @@
 #include<ncurses.h>
 #include<stdlib.h>
 #include<string.h>
-void username(char name[]) {
+char name[200], pass[200], mail[200];
+void sign_up();
+void sign_in();
+void quit();
+void username();
+void password();
+void email();
+int main() {
+    initscr();
+    start_color();
+    if(has_colors() == FALSE){	
+        endwin();
+	    printf("Your terminal does not support color\n");
+	    exit(1);
+    }
+    init_pair(1, COLOR_GREEN, COLOR_BLACK);
+    attron(COLOR_PAIR(1));
+    mvprintw(20,83, "enter 1 to sign up");
+    mvprintw(21,83, "enter 2 to sign in");
+    refresh();
+    char onetwo = getchar();
+    if(onetwo == '1') {clear(),sign_up();}
+    else if(onetwo == '2'){clear(),sign_in();} 
+    quit();
+    refresh();
+    endwin();
+    return 0;
+}
+void username() {
     while(1) {
         scanw(" %s", name);
         FILE* check = fopen(name, "r");
@@ -13,11 +41,11 @@ void username(char name[]) {
             return;
         }
         else if((check != NULL) || (strlen(name) < 7)){
-            printw("Username has already been taken or it's not long enough\nplease enter a new username\n");
+            printw("Username has already been taken(at least 7 characters) or it's not long enough\nplease enter a new username\n");
         }
     }
 }
-void password(char pass[]) {
+void password() {
     while(1) {
         scanw(" %s", pass);
         int u = 0, l = 0, n = 0;
@@ -46,7 +74,7 @@ void password(char pass[]) {
         }
     }
 }
-void email(char mail[]) {
+void email() {
     while(1) {
         scanw(" %s", mail);
         int ad = 0, dot = 0;
@@ -68,25 +96,27 @@ void email(char mail[]) {
         }
     }
 }
-int main() {
-    char name[200], pass[200], mail[200];
-    initscr();
+void sign_up() {
     printw("Enter your username:\n");
-    username(name);
+    username();
     printw("Enter your password:\n");
-    password(pass);
+    password();
     printw("Enter your email:\n");
-    email(mail);
+    email();
+}
+void sign_in () {
+    printw("Enter your username:\n");
+    scanw("%s", name);
+}
+void quit() {
+    char c;
     while(1) {
-        char c  = getchar();
-        if(c == 'q') {
-            break;
-        }
-        else {
-            clear();
-        }
+       c = getchar();
+       if(c == 'q') {
+        return;
+       }
+       else {
+        clear();
+       }
     }
-    refresh();
-    endwin();
-    return 0;
 }
