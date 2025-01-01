@@ -129,7 +129,7 @@ void sign_in () {
         FILE* f = fopen(name, "r");
         char* pass = (char*)malloc(200);
         while (1) {
-                fgets(pass, sizeof pass, f);
+            fgets(pass, sizeof pass, f);
             if (count == 3) {
                 break;
             }
