@@ -1,10 +1,26 @@
+//46*189
+//x:1-34 y:1-179
 //back button
 //load game
+//music
+//forgot password
+//min doors and pillars
 #include<stdio.h>
 #include<ncurses.h>
 #include<stdlib.h>
 #include<string.h>
 #include<unistd.h>
+#include <time.h>
+typedef struct {
+    char name[100], pass[100], mail[100];
+    int points, golds, exp, health, color, x, y;
+} att;
+att player;
+typedef struct {
+    int x, y;
+    char c[100][100];
+} Room;
+Room* room;
 void initialize();
 void sign_up();
 void sign_in();
@@ -13,11 +29,10 @@ void scoreboard();
 void setting();
 void quit();
 void start_game();
-typedef struct {
-    char name[100], pass[100], mail[100];
-    int points, golds, exp, health, color;
-} att;
-att player;
+void input(char);
+void create_map();
+void print_map();
+int check_room(Room*);
 int main() {
     initscr();
     keypad(stdscr, TRUE);
@@ -27,15 +42,22 @@ int main() {
 	    printf("Your terminal does not support color\n");
 	    exit(1);
     }
+    init_color(COLOR_BLACK, 40, 40, 40);
     init_pair(8, COLOR_GREEN, COLOR_BLACK);
     attron(COLOR_PAIR(8));
-    initialize();
+    //initialize();
+    //attroff(COLOR_PAIR(8));
+    room = malloc(6 * sizeof(Room));
     while(1) {
+        mvprintw(0,184, "0:quit");
+        refresh();
+        char c;
         char message[100];
         start_game();
+        c = getchar();
+        if(c == '0') {quit(); break;}
+        input(c);
     }
-    quit();
-    refresh();
     endwin();
     return 0;
 }
@@ -46,9 +68,20 @@ void initialize() {
     refresh();
     while(1) {
     char n = getchar();
-        if(n == '1') {clear(),sign_up(); break;}
-        else if(n == '2') {clear(),sign_in(); break;} 
-        else if(n == '3') {clear();break;}
+        if(n == '1') {
+            clear();
+            sign_up();
+            break;
+        }
+        else if(n == '2') {
+            clear();
+            sign_in();
+            break;
+        } 
+        else if(n == '3') {
+            clear();
+            break;
+        }
         else {continue;}
     }
 }
@@ -176,11 +209,28 @@ void menu() {
     refresh();
     while(1) {
         char n = getchar();
-        if(n == '1') {clear(); break;}
-        else if(n == '2') {clear(); break;} 
-        else if(n == '3') {clear(), scoreboard(); break;}
-        else if(n == '4') {clear(), setting(); break;}
-        else if(n == '5') {clear(); break;}
+        if(n == '1') {
+            clear();
+            break;
+        }
+        else if(n == '2') {
+            clear();
+            break;
+        } 
+        else if(n == '3') {
+            clear();
+            scoreboard();
+            break;
+        }
+        else if(n == '4') {
+            clear();
+            setting();
+            break;
+        }
+        else if(n == '5') {
+            clear();
+            break;
+        }
         else {continue;}
     }
 }
@@ -249,30 +299,120 @@ void setting() {
                     player.color = 4;
                     break;
                 }
-                else if(n == '0') {setting();break;}
+                else if(n == '0') {
+                    setting();
+                    break;
+                }
                 else{continue;}
             }
             break;
         } 
-        else if(n == '3') {clear(); break;}
-        else if(n == '0') {menu();break;}
+        else if(n == '3') {
+            clear(); 
+            break;
+        }
+        else if(n == '0') {
+            menu();
+            break;
+        }
         else {continue;}
     }
 
 }
 void start_game() {
+    create_map();
+    print_map();
+}
+void create_map() {
+    srand(time(NULL));
+    for(int i = 0; i < 6; i++) {
+        room[i].x = rand() % (34) + 2;
+        room[i].y = rand() % (160) + 15;
+    }
+    int x = check_room(room);
+    while(x == 0) {
+        for(int i = 0; i < 6; i++) {
+            room[i].x = rand() % (34) + 2;
+            room[i].y = rand() % (160) + 15;
+        }
+        x = check_room(room);
+    }
+}
+int check_room(Room * room) {
+    for(int i = 0; i < 5; i++) {
+        for(int j = i + 1; j < 6; j++) {
+            refresh();
+            if(abs(room[i].y - room[j].y) <= 18 ) {
+                return 0;
+            }
+        }
+    }
+    return 1;
+}
+void print_map() {
+    clear();
+    srand(time(NULL));
+    for(int i = 0; i < 6; i++) {
+        int I = rand() % (7) + 4;
+        int J = rand() % (7) + 4;
+        int x = rand() % (2) + 1;
+        int X = rand() % (I) + room[i].x;
+        int Y = rand () % (J) + room[i].y;
+        int door;
+        if(x == 1) {
+            door = rand() % (I) + room[i].x;
+        }
+        else {
+            door = rand () % (J) + room[i].y;
+        }
+        for(int j = room[i].x; j < room[i].x + I; j++) {
+            for(int q = room[i].y; q < room[i].y + J; q++) {
+                if(j == X && q == Y) {
+                    mvprintw(j, q, "O");
+                    room[i].c[j][q] = 'O';
+                    continue;
+                }
+                mvprintw(j, q, ".");
+                room[i].c[j][q] = '.';
+                refresh();
+            }
+        }
+        for(int j = room[i].y; j < room[i].y + J; j++) {
+            if(x == 2 && door == j) {
+                mvprintw(room[i].x - 1, j, "+");
+                room[i].c[room[i].x][j] = '+';
+                mvprintw(room[i].x + I, j, "_");
+                room[i].c[room[i].x + I][j] = '_';
+                continue;
+            }
+            mvprintw(room[i].x - 1, j, "_");
+            room[i].c[room[i].x][j] = '_';
+            mvprintw(room[i].x + I, j, "_");
+            room[i].c[room[i].x + I][j] = '_';
+            refresh();
+        }
+        for(int j = room[i].x; j < room[i].x + I; j++) {
+            if(x == 1 && door == j) {
+                mvprintw(j, room[i].y - 1, "+");
+                room[i].c[j][room[i].y] = '+';
+                mvprintw(j, room[i].y + J , "|");
+                room[i].c[j][room[i].y + J] = '|';
+                continue;
+            }
+            mvprintw(j, room[i].y - 1, "|");
+            room[i].c[j][room[i].y] = '|';
+            mvprintw(j, room[i].y + J , "|");
+            room[i].c[j][room[i].y + J] = '|';
+            refresh();
+        }
+    }
+}
+void input(char c) {
 
 }
-
 void quit() {
-    char c;
-    while(1) {
-       c = getchar();
-       if(c == 'q') {
-        return;
-       }
-       else {
-        clear();
-       }
-    }
+    clear();
+    mvprintw(20,83, "press any key to quit");
+    refresh();
+    char c = getchar();
 }
