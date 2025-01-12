@@ -31,7 +31,7 @@ typedef struct {
 } Room;
 Room* room;
 char message[100];
-int floor = 1; 
+int floor = 1, T = 0; 
 int check = 0;
 void initialize();
 void sign_up();
@@ -40,12 +40,12 @@ void menu();
 void scoreboard();
 void setting();
 void quit();
-void input(char, char**);
+void input(char, char**, char**);
 void create_map(char***);
 void print_map(char**);
 int check_room(Room*);
 void Doors(pos*, char***);
-void print_character(int, int, char**);
+void print_character(int, int, char**, char**);
 void save_borad();
 void create_board(char***);
 int main() {
@@ -62,6 +62,9 @@ int main() {
     init_color(COLOR_RED, 1000, 0, 0);
     init_color(1, 700, 330, 330);
     init_pair(11, COLOR_RED, COLOR_BLACK);
+    //init_color(19, 500, 0, 700);
+    init_color(15, 240, 90, 90);
+    init_pair(14, 15, COLOR_BLACK);
     init_pair(8, COLOR_GREEN, COLOR_BLACK);
     init_pair(10, COLOR_BLUE, COLOR_BLACK);
     init_pair(9, COLOR_WHITE, COLOR_BLACK);
@@ -111,7 +114,12 @@ int main() {
     }
     room = malloc(6 * sizeof(Room));
     room[4].pass = 0;
-    create_map(&board1); 
+    create_map(&board1);
+    floor++; 
+    create_map(&board2);  
+    create_map(&board3); 
+    create_map(&board4); 
+    floor = 1;
     print_map(board1); 
     save_borad(board1);
     while(1) {
@@ -123,7 +131,23 @@ int main() {
         //message[0] = '\0';
         c = getchar();
         if(c == '0') {quit(); break;}
-        input(c, board1);
+        switch (floor)
+        {
+        case 1:
+            input(c, board1, board2);
+            break;
+        case 2:
+            input(c, board2, board3);
+            break;
+        case 3:
+            input(c, board3, board4);
+            break;
+        case 4:
+            input(c, board4, board4);
+            break;
+        default:
+            break;
+        }
     }
     endwin();
     return 0;
@@ -422,20 +446,20 @@ void create_map(char*** board) {
                 door = rand () % (J) + room[i].y;
             }
         }
-        player.x = X + 1 ;
-        player.y = Y - 1;
-        mvprintw(player.x, player.y, "H"); 
-        refresh();
+        if(floor == 1) {
+            player.x = X + 1 ;
+            player.y = Y - 1;
+            mvprintw(player.x, player.y, "H"); 
+            refresh();
+        }
         for(int j = room[i].x; j < room[i].x + I; j++) {
             for(int q = room[i].y; q < room[i].y + J; q++) {
                 if(j == X && q == Y) {
-                    ////mvprintw(j, q, "O");
                     (*board)[j][q] = 'O';
                     room[i].c[j][q] = 'O';
                     continue;
                 }
                 else if(j == X - 1 && q == Y) {
-                    ////mvprintw(j, q, ".");
                     (*board)[j][q] = '^';
                     room[i].c[j][q] = '.';
                     refresh();
@@ -443,7 +467,6 @@ void create_map(char*** board) {
                 }
                 else if(j == X - 1 && q == Y + 1 && i == 0) {
                     attron(COLOR_PAIR(12));
-                    ////mvprintw(j, q, "<");
                     attroff(COLOR_PAIR(12));
                     attron(COLOR_PAIR(8));
                     (*board)[j][q] = '<';
@@ -453,7 +476,6 @@ void create_map(char*** board) {
                 }
                 else if(j == X - 1 && q == Y + 1 && i == 4) {
                     attron(COLOR_PAIR(11));
-                    ////mvprintw(j, q, "@");
                     attroff(COLOR_PAIR(11));
                     (*board)[j][q] = '@';
                     room[i].c[j][q] = '@';
@@ -463,7 +485,6 @@ void create_map(char*** board) {
                 }
                 else if(j == room[i].x + I - 1 && q == room[i].y + J - 1 && i == 4) {
                     attron(COLOR_PAIR(9));
-                    ////mvprintw(j, q, "&");
                     attroff(COLOR_PAIR(9));
                     (*board)[j][q] = '&';
                     room[i].c[j][q] = '&';
@@ -471,50 +492,46 @@ void create_map(char*** board) {
                     refresh();
                     continue;
                 }
-                
-                ////mvprintw(j, q, ".");
+                else if(j == room[i].x && q == room[i].y + J - 1 && i == 1) {
+                    (*board)[j][q] = 'T';
+                    room[i].c[j][q] = 'T';
+                    attron(COLOR_PAIR(8));
+                    refresh();
+                    continue;
+                }
                 (*board)[j][q] = '.';
                 room[i].c[j][q] = '.';
                 refresh();
-                
             }
         }
         for(int j = room[i].y; j < room[i].y + J; j++) {
             if(x == 2 && door == j) {
-                ////mvprintw(room[i].x - 1, j, "+");
                 (*board)[room[i].x - 1][j] = '+';
                 room[i].c[room[i].x][j] = '+';
-               //// mvprintw(room[i].x + I, j, "_");
                 (*board)[room[i].x + I][j] = '_';
                 room[i].c[room[i].x + I][j] = '_';
                 doors[i].x = room[i].x - 1;
                 doors[i].y = j;
                 continue;
             }
-            ////mvprintw(room[i].x - 1, j, "_");
             (*board)[room[i].x - 1][j] = '_';
             room[i].c[room[i].x][j] = '_';
-            ////mvprintw(room[i].x + I, j, "_");
             (*board)[room[i].x + I][j] = '_';
             room[i].c[room[i].x + I][j] = '_';
             refresh();
         }
         for(int j = room[i].x; j < room[i].x + I; j++) {
             if(x == 1 && door == j) {
-                ////mvprintw(j, room[i].y - 1, "+");
                 (*board)[j][room[i].y - 1] = '+';
                 room[i].c[j][room[i].y] = '+';
-                ////mvprintw(j, room[i].y + J , "|");
                 (*board)[j][room[i].y + J] = '|';
                 room[i].c[j][room[i].y + J] = '|';
                 doors[i].x = j;
                 doors[i].y = room[i].y - 1;
                 continue;
             }
-                ////mvprintw(j, room[i].y - 1, "|");
                 (*board)[j][room[i].y - 1] = '|';
                 room[i].c[j][room[i].y] = '|';
-                ////mvprintw(j, room[i].y + J , "|");
                 (*board)[j][room[i].y + J] = '|';
                 room[i].c[j][room[i].y + J] = '|';
                 refresh();
@@ -522,7 +539,7 @@ void create_map(char*** board) {
     }
     Doors(doors, board);
 }
-int check_room(Room * room) {
+int check_room(Room* room) {
     for(int i = 0; i < 5; i++) {
         for(int j = i + 1; j < 6; j++) {
             refresh();
@@ -560,6 +577,26 @@ void print_map(char** board) {
                 refresh();
                 attroff(COLOR_PAIR(8));
             }
+            else if(board[i][j] == 'T') {
+                attron(COLOR_PAIR(13));
+                mvaddstr(i, j, "\U000025B2");
+                attroff(COLOR_PAIR(13));
+            }
+            else if(board[i][j] == '#') {
+                attron(COLOR_PAIR(9));
+                mvprintw(i, j, "#");
+                attroff(COLOR_PAIR(9));
+            }
+            else if(board[i][j] == '_') {
+                attron(COLOR_PAIR(14));
+                mvprintw(i, j, "_");
+                attroff(COLOR_PAIR(14));
+            }
+            else if(board[i][j] == '|') {
+                attron(COLOR_PAIR(14));
+                mvprintw(i, j, "|");
+                attroff(COLOR_PAIR(14));
+            }
             else {
                 attron(COLOR_PAIR(8));
                 mvprintw(i, j, "%c", board[i][j]);
@@ -578,14 +615,12 @@ void Doors(pos* doors, char*** board) {
         temp.y = doors[p].y;
         if((*board)[temp.x - 1][temp.y] == ' ') {
             temp.x = temp.x - 1;
-            //mvprintw(temp.x, temp.y, "#");
             (*board)[temp.x][temp.y] = '#';
             refresh();
         }
         
         else if((*board)[temp.x][temp.y - 1] == ' ') {
             temp.y = temp.y - 1;
-            //mvprintw(temp.x, temp.y, "#");
             (*board)[temp.x][temp.y] = '#';
             refresh();
         }
@@ -605,28 +640,24 @@ void Doors(pos* doors, char*** board) {
                     break;
                 }
                 if(((*board)[temp.x + 1][temp.y] == ' ') || ((*board)[temp.x + 1][temp.y] == '#')) {
-                    //mvprintw(temp.x + 1, temp.y, "#");
                     refresh();
                     temp.x++;
                     (*board)[temp.x][temp.y] = '#';
                     continue;
                 }
                 else if(((*board)[temp.x][temp.y - 1] == ' ') || ((*board)[temp.x][temp.y - 1] == '#')) {
-                    //mvprintw(temp.x, temp.y - 1, "#");
                     refresh();
                     temp.y--;
                     (*board)[temp.x][temp.y] = '#';
                     continue;
                 }
                 else if(((*board)[temp.x][temp.y + 1] == ' ') || ((*board)[temp.x][temp.y + 1] == '#')) {
-                    //mvprintw(temp.x, temp.y + 1, "#");
                     refresh();
                     temp.y++;
                     (*board)[temp.x][temp.y] = '#';
                     continue;
                 }
                 else if(((*board)[temp.x - 1][temp.y] == ' ') || ((*board)[temp.x - 1][temp.y] == '#')) {
-                    //mvprintw(temp.x - 1, temp.y, "#");
                     refresh();
                     temp.x--;
                     (*board)[temp.x][temp.y] = '#';
@@ -647,28 +678,24 @@ void Doors(pos* doors, char*** board) {
                     break;
                 }
                 if(((*board)[temp.x - 1][temp.y] == ' ') || ((*board)[temp.x - 1][temp.y] == '#')) {
-                    //mvprintw(temp.x - 1, temp.y, "#");
                     refresh();
                     temp.x--;
                     (*board)[temp.x][temp.y] = '#';
                     continue;
                 }
                 else if(((*board)[temp.x][temp.y - 1] == ' ') || ((*board)[temp.x][temp.y - 1] == '#')) {
-                    //mvprintw(temp.x, temp.y - 1, "#");
                     refresh();
                     temp.y--;
                     (*board)[temp.x][temp.y] = '#';
                     continue;
                 }
                 else if(((*board)[temp.x + 1][temp.y] == ' ') || ((*board)[temp.x + 1][temp.y] == '#')) {
-                    //mvprintw(temp.x + 1, temp.y, "#");
                     refresh();
                     temp.x++;
                     (*board)[temp.x][temp.y] = '#';
                     continue;
                 }
                 else if(((*board)[temp.x][temp.y + 1] == ' ') || ((*board)[temp.x][temp.y + 1] == '#')) {
-                    //mvprintw(temp.x, temp.y + 1, "#");
                     refresh();
                     temp.y++;
                     (*board)[temp.x][temp.y] = '#';
@@ -689,28 +716,24 @@ void Doors(pos* doors, char*** board) {
                     break;
                 }
                 if(((*board)[temp.x][temp.y + 1] == ' ') || ((*board)[temp.x][temp.y + 1] == '#')) {
-                    //mvprintw(temp.x, temp.y + 1, "#");
                     refresh();
                     temp.y++;
                     (*board)[temp.x][temp.y] = '#';
                     continue;
                 }
                 else if(((*board)[temp.x - 1][temp.y] == ' ') || ((*board)[temp.x - 1][temp.y] == '#')) {
-                    //mvprintw(temp.x - 1, temp.y, "#");
                     refresh();
                     temp.x--;
                     (*board)[temp.x][temp.y] = '#';
                     continue;
                 }
                 else if(((*board)[temp.x + 1][temp.y] == ' ') || ((*board)[temp.x + 1][temp.y] == '#')) {
-                    //mvprintw(temp.x + 1, temp.y, "#");
                     refresh();
                     temp.x++;
                     (*board)[temp.x][temp.y] = '#';
                     continue;
                 }
                 else if(((*board)[temp.x][temp.y - 1] == ' ') || ((*board)[temp.x][temp.y - 1] == '#')) {
-                    //mvprintw(temp.x, temp.y - 1, "#");
                     refresh();
                     temp.y--;
                     (*board)[temp.x][temp.y] = '#';
@@ -731,28 +754,24 @@ void Doors(pos* doors, char*** board) {
                     break;
                 }
                 if(((*board)[temp.x][temp.y - 1] == ' ') || ((*board)[temp.x][temp.y - 1] == '#')) {
-                    //mvprintw(temp.x, temp.y - 1, "#");
                     refresh();
                     temp.y--;
                     (*board)[temp.x][temp.y] = '#';
                     continue;
                 }
                 else if(((*board)[temp.x - 1][temp.y] == ' ') || ((*board)[temp.x - 1][temp.y] == '#')) {
-                    //mvprintw(temp.x - 1, temp.y, "#");
                     refresh();
                     temp.x--;
                     (*board)[temp.x][temp.y] = '#';
                     continue;
                 }
                 else if(((*board)[temp.x + 1][temp.y] == ' ') || ((*board)[temp.x + 1][temp.y] == '#')) {
-                    //mvprintw(temp.x + 1, temp.y, "#");
                     refresh();
                     temp.x++;
                     (*board)[temp.x][temp.y] = '#';
                     continue;
                 }
                 else if(((*board)[temp.x][temp.y + 1] == ' ') || ((*board)[temp.x][temp.y + 1] == '#')) {
-                    //mvprintw(temp.x, temp.y + 1, "#");
                     refresh();
                     temp.y++;
                     (*board)[temp.x][temp.y] = '#';
@@ -778,48 +797,133 @@ void Doors(pos* doors, char*** board) {
         }
     }
 }
-void input(char c, char** board) {
+void input(char c, char** board, char** next_board) {
     int x = player.x , y = player.y;
     switch (c) {
         case 'w': 
             player.x--;
-            print_character(x, y, board);
+            print_character(x, y, board, next_board);
             break;
         case 's':
             player.x++;
-            print_character(x, y, board);
+            print_character(x, y, board, next_board);
             break;
         case 'a':
             player.y--;
-            print_character(x, y, board);
+            print_character(x, y, board, next_board);
             break;
         case 'd':
             player.y++;
-            print_character(x, y, board);
+            print_character(x, y, board, next_board);
             break;
         case 'e':
             player.x--;
             player.y++;
-            print_character(x, y, board);
+            print_character(x, y, board, next_board);
             break;
         case 'q':
             player.x--;
             player.y--;
-            print_character(x, y, board);
+            print_character(x, y, board, next_board);
             break;
         case 'z':
             player.x++;
             player.y--;
-            print_character(x, y, board);
+            print_character(x, y, board, next_board);
             break;
         case 'x':
             player.x++;
             player.y++;
-            print_character(x, y, board);
+            print_character(x, y, board, next_board);
             break;
+        case 'f':
+            char c = getchar();
+            if(c == 'w') {
+                mvprintw(2,0,"w");
+                while(board[player.x - 1][player.y] != ' ' && board[player.x - 1][player.y] != '_' && board[player.x - 1][player.y] != '|' && board[player.x - 1][player.y] != 'O') {
+                    player.x--;
+                }
+            }
+            else if(c == 's') {
+                mvprintw(2,0,"s");
+                while(board[player.x + 1][player.y] != ' ' && board[player.x + 1][player.y] != '_' && board[player.x + 1][player.y] != '|' && board[player.x + 1][player.y] != 'O') {
+                    player.x++;
+                }
+            }
+            else if(c == 'a') {
+                mvprintw(2,0,"a");
+                while(board[player.x][player.y - 1] != ' ' && board[player.x][player.y - 1] != '_' && board[player.x][player.y - 1] != '|' && board[player.x][player.y - 1] != 'O') {
+                    player.y--;
+                }
+            }
+            else if(c == 'd') {
+                while(board[player.x][player.y + 1] != ' ' && board[player.x][player.y + 1] != '_' && board[player.x][player.y + 1] != '|' && board[player.x][player.y + 1] != 'O') {
+                mvprintw(2,0,"d");
+                    player.y++;
+                }
+            }
+            attron(COLOR_PAIR(8));
+            mvprintw(x, y, ".");
+            attroff(COLOR_PAIR(8));
+            x = player.x;
+            y = player.y;
+            print_character(x, y, board, next_board);
+            break;
+        case 'g':
+            char cc = getchar();
+            if(cc == 'w') {
+                mvprintw(2,0,"w");
+                while(board[player.x - 1][player.y] != ' ' && board[player.x - 1][player.y] != '_' && board[player.x - 1][player.y] != '|' && board[player.x - 1][player.y] != 'O') {
+                    player.x--;
+                }
+            }
+            else if(cc == 's') {
+                mvprintw(2,0,"s");
+                while(board[player.x + 1][player.y] != ' ' && board[player.x + 1][player.y] != '_' && board[player.x + 1][player.y] != '|' && board[player.x + 1][player.y] != 'O') {
+                    player.x++;
+                }
+            }
+            else if(cc == 'a') {
+                mvprintw(2,0,"a");
+                while(board[player.x][player.y - 1] != ' ' && board[player.x][player.y - 1] != '_' && board[player.x][player.y - 1] != '|' && board[player.x][player.y - 1] != 'O') {
+                    player.y--;
+                }
+            }
+            else if(cc == 'd') {
+                while(board[player.x][player.y + 1] != ' ' && board[player.x][player.y + 1] != '_' && board[player.x][player.y + 1] != '|' && board[player.x][player.y + 1] != 'O') {
+                mvprintw(2,0,"d");
+                    player.y++;
+                }
+            }
+            if(board[x][y] == '.') {
+            attron(COLOR_PAIR(8));
+            mvprintw(x, y, ".");
+            attroff(COLOR_PAIR(8));
+            }
+            if(board[x][y] == '#') {
+            attron(COLOR_PAIR(9));
+            mvprintw(x, y, "#");
+            attroff(COLOR_PAIR(9));
+            }
+            x = player.x;
+            y = player.y;
+            print_character(x, y, board, next_board);
+            break;
+        case 'S':
+            mvprintw(x + 1, y, "%c", board[x + 1][y]);
+            mvprintw(x + 1, y - 1, "%c", board[x + 1][y - 1]);
+            mvprintw(x + 1, y + 1, "%c", board[x + 1][y + 1]);
+            mvprintw(x, y - 1, "%c", board[x][y - 1]);
+            mvprintw(x, y + 1, "%c", board[x][y + 1]);
+            mvprintw(x - 1, y, "%c", board[x - 1][y]);
+            mvprintw(x - 1, y + 1, "%c", board[x - 1][y + 1]);
+            mvprintw(x - 1, y - 1, "%c", board[x - 1][y - 1]);
+            refresh();
+            break;
+
     }
 }
-void print_character(int ox, int oy, char** board) {
+void print_character(int ox, int oy, char** board, char** next_board) {
     switch (board[player.x][player.y]) {
         case '#':
             if(board[ox][oy] == '+') {
@@ -833,9 +937,9 @@ void print_character(int ox, int oy, char** board) {
                 refresh();
             }
             else if(board[ox][oy] == '#') {
-                attron(COLOR_PAIR(8));
+                attron(COLOR_PAIR(9));
                 mvprintw(ox, oy, "#");
-                attroff(COLOR_PAIR(8));
+                attroff(COLOR_PAIR(9));
                 attron(COLOR_PAIR(10));
                 mvprintw(player.x, player.y, "H"); 
                 attroff(COLOR_PAIR(10));
@@ -892,6 +996,24 @@ void print_character(int ox, int oy, char** board) {
                 attroff(COLOR_PAIR(10));
                 refresh();
             }
+            else if(board[ox][oy] == 'T') {
+                attron(COLOR_PAIR(8));
+                mvprintw(ox, oy, ".");
+                attroff(COLOR_PAIR(8));
+                attron(COLOR_PAIR(10));
+                mvprintw(player.x, player.y, "H"); 
+                attroff(COLOR_PAIR(10));
+                refresh();
+            }
+            else if(board[ox][oy] == '@') {
+                attron(COLOR_PAIR(8));
+                mvprintw(ox, oy, "@");
+                attroff(COLOR_PAIR(8));
+                attron(COLOR_PAIR(10));
+                mvprintw(player.x, player.y, "H"); 
+                attroff(COLOR_PAIR(10));
+                refresh();
+            }
             break;
         case 'O': 
             player.x = ox;
@@ -929,9 +1051,9 @@ void print_character(int ox, int oy, char** board) {
                 refresh();
             }
             else if(board[ox][oy] == '#') {
-                attron(COLOR_PAIR(8));
+                attron(COLOR_PAIR(9));
                 mvprintw(ox, oy, "#");
-                attroff(COLOR_PAIR(8));
+                attroff(COLOR_PAIR(9));
                 attron(COLOR_PAIR(10));
                 mvprintw(player.x, player.y, "H"); 
                 attroff(COLOR_PAIR(10));
@@ -954,13 +1076,14 @@ void print_character(int ox, int oy, char** board) {
             player.health -= 5;
             break;
         case '<': 
+            floor++;
             clear();
             strcpy(message, "You entered the next floor!");
             attron(COLOR_PAIR(9));
             mvprintw(0,0,"%s", message);
             attroff(COLOR_PAIR(9));
             attron(COLOR_PAIR(8));
-            // print_map(&board);
+            print_map(next_board);
             mvprintw(player.x, player.y, "<");
             board[player.x][player.y] = '<';
             break;
@@ -972,58 +1095,73 @@ void print_character(int ox, int oy, char** board) {
             mvprintw(player.x, player.y, "H"); 
             attroff(COLOR_PAIR(10));
             room[4].pass = rand() % (9000) + 1000;
-            mvprintw(0,0, "%d", room[4].pass);
+            mvprintw(1,0, "%d", room[4].pass);
+            //halfdelay(30);
             refresh();
             break;
         case '@':
-            clear();
-            if(room[4].pass == 0) {
-                mvprintw(20, 83, "You haven't created a password!");
-                mvprintw(21, 83, "type 0 to get back");
+            if(T > 0) {
+                mvprintw(0,0,"Opened the door with ancient key!");
                 refresh();
-                char c = getchar();
-                while (c != '0') {
-                    c = getchar();
-                }
-                print_map(board);
             }
             else {
-                int p;
-                mvprintw(20, 83, "Enter the password:");
-                scanw("%d", &p);
-                if(p == room[4].pass) {
+                clear();
+                if(room[4].pass == 0) {
+                    mvprintw(20, 83, "You haven't created a password!");
+                    mvprintw(21, 83, "type 0 to get back");
+                    refresh();
+                    char c = getchar();
+                    while (c != '0') {
+                        c = getchar();
+                    }
                     print_map(board);
-                    mvprintw(0,0, "%d", room[4].pass);
-                    attron(COLOR_PAIR(8));
-                    mvprintw(player.x, player.y, "@");
-                    attroff(COLOR_PAIR(8));
-                    player.x = ox;
-                    player.y = oy;
                 }
                 else {
-                    check++;
-                    print_map(board);
-                    mvprintw(0,0, "%d", room[4].pass);
-                    if(check == 1) {
-                        attron(COLOR_PAIR(13));
+                    int p;
+                    mvprintw(20, 83, "Enter the password:");
+                    scanw("%d", &p);
+                    if(p == room[4].pass) {
+                        print_map(board);
+                        mvprintw(1,0, "%d", room[4].pass);
+                        attron(COLOR_PAIR(8));
                         mvprintw(player.x, player.y, "@");
-                        attroff(COLOR_PAIR(13));
+                        attroff(COLOR_PAIR(8));
+                        player.x = ox;
+                        player.y = oy;
                     }
-                    else if(check == 2) {
-                        attron(COLOR_PAIR(11));
-                        mvprintw(player.x, player.y, "@");
-                        attroff(COLOR_PAIR(11));
+                    else {
+                        check++;
+                        print_map(board);
+                        mvprintw(1,0, "%d", room[4].pass);
+                        if(check == 1) {
+                            attron(COLOR_PAIR(13));
+                            mvprintw(player.x, player.y, "@");
+                            attroff(COLOR_PAIR(13));
+                        }
+                        else if(check == 2) {
+                            attron(COLOR_PAIR(11));
+                            mvprintw(player.x, player.y, "@");
+                            attroff(COLOR_PAIR(11));
 
+                        }
+                        player.x = ox;
+                        player.y = oy;
                     }
-                    player.x = ox;
-                    player.y = oy;
                 }
             }
+            break;
+        case 'T':
+            T++;
+            attron(COLOR_PAIR(8));
+            mvprintw(ox, oy, ".");
+            attroff(COLOR_PAIR(8));
+            attron(COLOR_PAIR(10));
+            mvprintw(player.x, player.y, "H"); 
+            attroff(COLOR_PAIR(10));
             break;
     }
     refresh();
 }
-
 void save_borad(char** board) {
     FILE* f;
     for(int i = 0; i <= 46; i++) {
