@@ -8,6 +8,7 @@
 //messages
 //other floor's boss bug
 //health and damage spell
+//g button
 #include<stdio.h>
 #include<ncurses.h>
 #include<stdlib.h>
@@ -39,9 +40,9 @@ typedef struct {
 boss demon[5], fire[5], giant[5], snake[5], undeed[5];
 int floor = 1, T = 0, reg_food = 0; 
 int dagger = 10, wand = 10, arrow = 10, sword = 0, mace = 1;
-int health = 0, damage = 0, speed = 0, s = 0, d = 0, scount = 0, dcount = 0;
+int health = 0, damage = 10, speed = 0, s = 0, d = 0, h = 0, scount = 0, dcount = 0, hcount = 0;
 char c1, c2, c3, c4, c5, c6, c7;
-int hidden = 0, trap = 0, check = 0, init_health;
+int hidden = 0, step = 0, trap = 0, check = 0, init_health;
 pos ddagger, wwand, aarrow;
 char** board1;
 char** board2;
@@ -154,7 +155,13 @@ int main() {
         }
         
 
-        
+        if(h == 1 && hcount != 10 ) {
+            hcount++;
+        }
+        else {
+            h = 0;
+            hcount = 0;
+        }
         if(s == 1 && scount != 10 ) {
             scount++;
         }
@@ -185,6 +192,13 @@ int main() {
         case 4:
             input(c, board4);
             break;
+        }
+        step++;
+        if(step % 20 == 0) {
+            for(int i = 0; i < 4; i++) {
+                mvprintw(i , 0, "                    ", step);
+                refresh();
+            }
         }
     }
     endwin();
@@ -532,7 +546,7 @@ void create_map(char*** board) {
             continue;
         }
         room[floor][i].x = rand() % (35) + 3;
-        room[floor][i].y = rand() % (158) + 16;
+        room[floor][i].y = rand() % (154) + 22;
     }
     int x = check_room(room);
     while(x == 0) {
@@ -547,7 +561,7 @@ void create_map(char*** board) {
                 continue;
             }
             room[floor][i].x = rand() % (35) + 3;
-            room[floor][i].y = rand() % (158) + 16;
+            room[floor][i].y = rand() % (154) + 22;
         }
         x = check_room(room);
     }
@@ -1174,8 +1188,13 @@ void input(char c, char** board) {
             else {
                 player.x--;
             }
-            if(player.health + 10 <= init_health) {
-                player.health += 10;
+            if(player.health + 20 <= init_health) {
+                if(h) {
+                    player.health += 20;
+                }
+                else {
+                    player.health += 10;
+                }
             }
             print_character(x, y, board);
             break;
@@ -1186,8 +1205,13 @@ void input(char c, char** board) {
             else {
                 player.x++;
             }
-            if(player.health + 10 <= init_health) {
-                player.health += 10;
+            if(player.health + 20 <= init_health) {
+                if(h) {
+                    player.health += 20;
+                }
+                else {
+                    player.health += 10;
+                }
             }
             print_character(x, y, board);
             break;
@@ -1198,8 +1222,13 @@ void input(char c, char** board) {
             else {
                 player.y--;
             }
-            if(player.health + 10 <= init_health) {
-                player.health += 10;
+            if(player.health + 20 <= init_health) {
+                if(h) {
+                    player.health += 20;
+                }
+                else {
+                    player.health += 10;
+                }
             }
             print_character(x, y, board);
             break;
@@ -1210,8 +1239,13 @@ void input(char c, char** board) {
             else {
                 player.y++;
             }
-            if(player.health + 10 <= init_health) {
-                player.health += 10;
+            if(player.health + 20 <= init_health) {
+                if(h) {
+                    player.health += 20;
+                }
+                else {
+                    player.health += 10;
+                }
             }
             print_character(x, y, board);
             break;
@@ -1224,8 +1258,13 @@ void input(char c, char** board) {
                 player.x--;
                 player.y++;
             }
-            if(player.health + 10 <= init_health) {
-                player.health += 10;
+            if(player.health + 20 <= init_health) {
+                if(h) {
+                    player.health += 20;
+                }
+                else {
+                    player.health += 10;
+                }
             }
             print_character(x, y, board);
             break;
@@ -1238,8 +1277,13 @@ void input(char c, char** board) {
                 player.x--;
                 player.y--;
             }
-            if(player.health + 10 <= init_health) {
-                player.health += 10;
+            if(player.health + 20 <= init_health) {
+                if(h) {
+                    player.health += 20;
+                }
+                else {
+                    player.health += 10;
+                }
             }
             print_character(x, y, board);
             break;
@@ -1252,8 +1296,13 @@ void input(char c, char** board) {
                 player.x++;
                 player.y--;
             }
-            if(player.health + 10 <= init_health) {
-                player.health += 10;
+            if(player.health + 20 <= init_health) {
+                if(h) {
+                    player.health += 20;
+                }
+                else {
+                    player.health += 10;
+                }
             }
             print_character(x, y, board);
             break;
@@ -1266,8 +1315,13 @@ void input(char c, char** board) {
                 player.x++;
                 player.y++;
             }
-            if(player.health + 10 <= init_health) {
-                player.health += 10;
+            if(player.health + 20 <= init_health) {
+                if(h) {
+                    player.health += 20;
+                }
+                else {
+                    player.health += 10;
+                }
             }
             print_character(x, y, board);
             break;
@@ -1276,25 +1330,25 @@ void input(char c, char** board) {
             if(c == 'w') {
                 while(board[player.x - 1][player.y] != ' ' && board[player.x - 1][player.y] != '_' && board[player.x - 1][player.y] != '|' && board[player.x - 1][player.y] != 'O') {
                     player.x--;
-                    player.hunger--;
+                    player.health--;
                 }
             }
             else if(c == 's') {
                 while(board[player.x + 1][player.y] != ' ' && board[player.x + 1][player.y] != '_' && board[player.x + 1][player.y] != '|' && board[player.x + 1][player.y] != 'O') {
                     player.x++;
-                    player.hunger--;
+                    player.health--;
                 }
             }
             else if(c == 'a') {
                 while(board[player.x][player.y - 1] != ' ' && board[player.x][player.y - 1] != '_' && board[player.x][player.y - 1] != '|' && board[player.x][player.y - 1] != 'O') {
                     player.y--;
-                    player.hunger--;
+                    player.health--;
                 }
             }
             else if(c == 'd') {
                 while(board[player.x][player.y + 1] != ' ' && board[player.x][player.y + 1] != '_' && board[player.x][player.y + 1] != '|' && board[player.x][player.y + 1] != 'O') {
                     player.y++;
-                    player.hunger--;
+                    player.health--;
                 }
             }
             if(board[x][y] == '.') {
@@ -2480,14 +2534,13 @@ void talisman_list(char** board) {
     mvprintw(0, 19, "numbers saved");
     refresh();
     while(1) {
-        mvprintw(2, 1, "1.health    \U00002671            %d", health);
-        mvprintw(4, 1, "2.damage    \U00002622            %d", damage);
-        mvprintw(6, 1, "3.speed     \U0001F6E6            %d", speed);
+        mvprintw(2, 1, "1.health    \U00002671            %d ", health);
+        mvprintw(4, 1, "2.damage    \U00002622            %d ", damage);
+        mvprintw(6, 1, "3.speed     \U0001F6E6            %d ", speed);
         refresh();
         char n = getchar();
         if(n == '1' && health > 0) {
-            player.hunger += 100;
-            player.health += 200;
+            h = 1;
             health--;
         }
         else if(n == '2' && damage > 0) {
@@ -2889,7 +2942,12 @@ void attack(char** board) {
     }
     else if(strcmp(player.weapon, "mace") == 0) {
         if(check_attack(board, 'e')) {
-            demon[floor].health -= 5;
+            if(d) {
+            demon[floor].health -= 10;
+            }
+            else {
+                demon[floor].health -= 5;
+            }
             if(demon[floor].health <= 0){demon[floor].health = 0;}
             attron(COLOR_PAIR(9));
             mvprintw(0, 0, "             ");
@@ -2899,11 +2957,20 @@ void attack(char** board) {
             refresh();
             attroff(COLOR_PAIR(9));
             if(demon[floor].health <= 0) {
+                attron(COLOR_PAIR(9));
+                mvprintw(3, 0, "                  ");
+                mvprintw(3, 0, "demon is dead");
+                attroff(COLOR_PAIR(9));
                 find_boss(board, 'e');
             }
         }
         else if(check_attack(board, 'f')) {
-            fire[floor].health -= 5;
+            if(d) {
+                fire[floor].health -= 10;
+            }
+            else {
+                fire[floor].health -= 5;
+            }
             if(fire[floor].health <= 0){fire[floor].health = 0;}
             attron(COLOR_PAIR(9));
             mvprintw(0, 0, "             ");
@@ -2913,11 +2980,20 @@ void attack(char** board) {
             refresh();
             attroff(COLOR_PAIR(9));
             if(fire[floor].health <= 0) {
+                attron(COLOR_PAIR(9));
+                mvprintw(3, 0, "                  ");
+                mvprintw(3, 0, "fire is dead");
+                attroff(COLOR_PAIR(9));
                 find_boss(board, 'f');
             }
         }
         else if(check_attack(board, 'i')) {
-            giant[floor].health -= 5;
+            if(d) {
+                giant[floor].health -= 10;
+            }
+            else {
+                giant[floor].health -= 5;
+            }
             if(giant[floor].health <= 0){giant[floor].health = 0;}
             attron(COLOR_PAIR(9));
             mvprintw(0, 0, "             ");
@@ -2927,11 +3003,20 @@ void attack(char** board) {
             refresh();
             attroff(COLOR_PAIR(9));
             if(giant[floor].health <= 0) {
+                attron(COLOR_PAIR(9));
+                mvprintw(3, 0, "                  ");
+                mvprintw(3, 0, "giant is dead");
+                attroff(COLOR_PAIR(9));
                 find_boss(board, 'i');
             }
         }
         else if(check_attack(board, 'n')) {
-            snake[floor].health -= 5;
+            if(d) {
+                snake[floor].health -= 10;
+            }
+            else {
+                snake[floor].health -= 5;
+            }
             if(snake[floor].health <= 0){snake[floor].health = 0;}
             attron(COLOR_PAIR(9));
             mvprintw(0, 0, "             ");
@@ -2941,11 +3026,20 @@ void attack(char** board) {
             refresh();
             attroff(COLOR_PAIR(9));
             if(snake[floor].health <= 0) {
+                attron(COLOR_PAIR(9));
+                mvprintw(3, 0, "                ");
+                mvprintw(3, 0, "sanke is dead");
+                attroff(COLOR_PAIR(9));
                 find_boss(board, 'n');
             }
         }
         else if(check_attack(board, 'u')) {
-            undeed[floor].health -= 5;
+            if(d) {
+                undeed[floor].health -= 10;
+            }
+            else {
+                undeed[floor].health -= 5;
+            }
             if(undeed[floor].health <= 0){undeed[floor].health = 0;}
             attron(COLOR_PAIR(9));
             mvprintw(0, 0, "              ");
@@ -2955,6 +3049,10 @@ void attack(char** board) {
             refresh();
             attroff(COLOR_PAIR(9));
             if(undeed[floor].health <= 0) {
+                attron(COLOR_PAIR(9));
+                mvprintw(3, 0, "                      ");
+                mvprintw(3, 0, "undeed is dead");
+                attroff(COLOR_PAIR(9));
                 find_boss(board, 'u');
             }
         }
@@ -3001,9 +3099,15 @@ void attack(char** board) {
             attroff(COLOR_PAIR(9));
         }
     }
+    
     else if(strcmp(player.weapon, "sword") == 0) {
         if(check_attack(board, 'e')) {
-            demon[floor].health -= 10;
+            if(d) {
+                demon[floor].health -= 20;
+            }
+            else {
+                demon[floor].health -= 10;
+            }
             if(demon[floor].health <= 0){demon[floor].health = 0;}
             attron(COLOR_PAIR(9));
             mvprintw(0, 0, "             ");
@@ -3013,11 +3117,20 @@ void attack(char** board) {
             refresh();
             attroff(COLOR_PAIR(9));
             if(demon[floor].health <= 0) {
+                attron(COLOR_PAIR(9));
+                mvprintw(3, 0, "                 ");
+                mvprintw(3, 0, "demon is dead");
+                attroff(COLOR_PAIR(9));
                 find_boss(board, 'e');
             }
         }
         else if(check_attack(board, 'f')) {
-            fire[floor].health -= 10;
+            if(d) {
+                fire[floor].health -= 20;
+            }
+            else {
+                fire[floor].health -= 10;
+            }
             if(fire[floor].health <= 0){fire[floor].health = 0;}
             attron(COLOR_PAIR(9));
             mvprintw(0, 0, "             ");
@@ -3027,11 +3140,20 @@ void attack(char** board) {
             refresh();
             attroff(COLOR_PAIR(9));
             if(fire[floor].health <= 0) {
+                attron(COLOR_PAIR(9));
+                mvprintw(3, 0, "                 ");
+                mvprintw(3, 0, "fire is dead");
+                attroff(COLOR_PAIR(9));
                 find_boss(board, 'f');
             }
         }
         else if(check_attack(board, 'i')) {
-            giant[floor].health -= 10;
+            if(d) {
+                giant[floor].health -= 20;
+            }
+            else {
+                giant[floor].health -= 10;
+            }
             if(giant[floor].health <= 0){giant[floor].health = 0;}
             attron(COLOR_PAIR(9));
             mvprintw(0, 0, "             ");
@@ -3041,11 +3163,20 @@ void attack(char** board) {
             refresh();
             attroff(COLOR_PAIR(9));
             if(giant[floor].health <= 0) {
+                attron(COLOR_PAIR(9));
+                mvprintw(3, 0, "                 ");
+                mvprintw(3, 0, "giant is dead");
+                attroff(COLOR_PAIR(9));
                 find_boss(board, 'i');
             }
         }
         else if(check_attack(board, 'n')) {
-            snake[floor].health -= 10;
+            if(d) {
+                snake[floor].health -= 20;
+            }
+            else {
+                snake[floor].health -= 10;
+            }
             if(snake[floor].health <= 0){snake[floor].health = 0;}
             attron(COLOR_PAIR(9));
             mvprintw(0, 0, "             ");
@@ -3055,11 +3186,20 @@ void attack(char** board) {
             refresh();
             attroff(COLOR_PAIR(9));
             if(snake[floor].health <= 0) {
+                attron(COLOR_PAIR(9));
+                mvprintw(3, 0, "                 ");
+                mvprintw(3, 0, "snake is dead");
+                attroff(COLOR_PAIR(9));
                 find_boss(board, 'n');
             }
         }
         else if(check_attack(board, 'u')) {
-            undeed[floor].health -= 10;
+            if(d) {
+                undeed[floor].health -= 20;
+            }
+            else {
+                undeed[floor].health -= 10;
+            }
             if(undeed[floor].health <= 0){undeed[floor].health = 0;}
             attron(COLOR_PAIR(9));
             mvprintw(0, 0, "              ");
@@ -3069,6 +3209,10 @@ void attack(char** board) {
             refresh();
             attroff(COLOR_PAIR(9));
             if(undeed[floor].health <= 0) {
+                attron(COLOR_PAIR(9));
+                mvprintw(3, 0, "                 ");
+                mvprintw(3, 0, "undeed is dead");
+                attroff(COLOR_PAIR(9));
                 find_boss(board, 'u');
             }
         }
