@@ -605,6 +605,7 @@ void menu() {
         else if(n == '2') {
             if(win == 1 || lose == 1) {
                 mvprintw(0, 77, "you don't have any saved game");
+                
                 refresh();
                 continue;
             }
