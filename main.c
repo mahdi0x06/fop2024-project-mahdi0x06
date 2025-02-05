@@ -42,7 +42,7 @@ int flor = 1, T = 0, reg_food = 0, z_food = 0, y_food = 0, x_food = 0, M = 0;
 int dagger = 10, wand = 10, arrow = 10, sword = 0, mace = 1;
 int health = 0, damage = 0, speed = 0, s = 0, d = 0, h = 0, scount = 0, dcount = 0, hcount = 0;
 char c1, c2, c3, c4, c5, c6, c7;
-int hidden = 0, check = 0,load = 0, n_login = 0, karbar = 0, init_health = 0, win = 0, lose = 0, guest = 0, song = 0;
+int hidden = 0, check = 0,load = 0, n_login = 0, karbar = 0, init_health = 0, win = 0, lose = 0, guest = 0, song = 0, nsong = 0, Nsong = 0;
 pos ddagger, wwand, aarrow;
 char** board1;
 char** board2;
@@ -176,9 +176,10 @@ int main() {
         }
         if(!(room[1][0].x <= player.x && player.x < room[1][0].x + room[1][0].I && room[1][0].y <= player.y && player.y < room[1][0].y + room[1][0].J)) {
             song = 0;
-            
+            //Mix_HaltMusic();
         }
         mvprintw(0,184, "0:save");
+        mvprintw(0, 166, "9:stop/play music");
         if(guest) {
             mvprintw(0,184, "0:quit");
         }
@@ -186,6 +187,7 @@ int main() {
         char c;
         mvprintw(46, 0, "HP:");
         mvprintw(46, 9, "Gold:%d", player.gold);
+        mvprintw(46, 17, "score:%d", player.score);
         if(1000 <= player.health) {
             mvprintw(46, 3, "%d", player.health);
         }
@@ -244,6 +246,38 @@ int main() {
                 
             quit(); 
             break;
+        }
+        else if(c == '9') {
+            if(Nsong) {
+                Mix_HaltMusic();
+                Nsong = 0;
+            }
+            else {
+                switch(nsong) {
+                    case 1:
+            play_audio("hasan_shamaeizadeh_-_ghogha.mp3");
+
+                        break;
+                    case 2:
+            play_audio("$ - CARNIVAL.mp3");
+
+                        break;
+                    case 3:
+            play_audio("01._theme_from_the_walking_dead.mp3");
+
+                        break;
+                    case 4:
+            play_audio("bobby_bass_hoist_the_colours 128.mp3");
+
+                        break;
+                    case 5:
+            play_audio("Clint Mansell - Lux Aeterna (320).mp3");
+
+                        break;
+                }
+                Nsong = 1;
+            }
+
         }
         if(win == 1){
             FILE* f = fopen("winlose", "w");
@@ -335,18 +369,28 @@ void music() {
         refresh();
         char c = getchar();
         if(c == '1') {
+            Nsong = 1;
+            nsong = 1;
             play_audio("hasan_shamaeizadeh_-_ghogha.mp3");
         }
         else if(c == '2') {
+            Nsong = 1;
+            nsong = 2;
             play_audio("$ - CARNIVAL.mp3");
         }
         else if (c == '3') {
+            Nsong = 1;
+            nsong = 3;
             play_audio("01._theme_from_the_walking_dead.mp3");
         }
         else if (c == '4') {
+            Nsong = 1;
+            nsong = 4;
             play_audio("bobby_bass_hoist_the_colours 128.mp3");
         }
         else if (c == '5') {
+            Nsong = 1;
+            nsong = 5;
             play_audio("Clint Mansell - Lux Aeterna (320).mp3");
         }
         else if(c == '0') {
@@ -711,12 +755,7 @@ void sign_in () {
 void profile() {
     char name[80];
     char email[80];
-    // FILE* f = fopen("info", "r");
-    // fscanf(f, "%d", &player.health);
-    // fscanf(f, "%d", &player.score);
-    // fscanf(f, "%d", &player.gold);
-    // fscanf(f, "%d", &player.exp);
-    // fclose(f);
+
     FILE* f1  = fopen(player.name, "r");
     fgets(name, 70, f1);
     fgets(email, 70, f1);
