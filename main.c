@@ -134,7 +134,7 @@ int main() {
     else if(strcmp(player.name, "TAmabani") == 0) {
         karbar = 3;
     }
-    else if(guest == 0) {
+    else if(strcmp(player.name, "omid") == 0) {
         karbar = 4;
     }
     color();
@@ -738,7 +738,7 @@ void sign_in () {
         fscanf(f3, "%d", &player.exp);
         fclose(f3);
     }
-    else {
+    else  if(strcmp(player.name, "omid") == 0){
         karbar = 4;
         FILE* f4 = fopen("scoreboard4", "r");
         char n[40];
@@ -793,7 +793,7 @@ void menu() {
     else if(strcmp(player.name, "TAmabani") == 0) {
         karbar = 3;
     }
-    else if(guest == 0) {
+    else if(strcmp(player.name, "omid") == 0) {
         karbar = 4;
     }
     attron(COLOR_PAIR(8));
@@ -977,6 +977,19 @@ void load_game() {
     }
     else if(karbar == 4) {
         FILE* f9 = fopen("info4", "r");
+        fscanf(f9, "%d", &player.health);
+        fscanf(f9, "%d", &player.score);
+        fscanf(f9, "%d", &player.gold);
+        fscanf(f9, "%d", &player.exp);
+        fscanf(f9, "%d", &player.color);
+        fscanf(f9, "%d", &player.x);
+        fscanf(f9, "%d", &player.y);
+        fscanf(f9, "%d", &player.hunger);
+        fscanf(f9, "%s", player.weapon);
+        fclose(f9);
+    }
+    else {
+        FILE* f9 = fopen("info", "r");
         fscanf(f9, "%d", &player.health);
         fscanf(f9, "%d", &player.score);
         fscanf(f9, "%d", &player.gold);
@@ -4765,11 +4778,25 @@ void print_character(int ox, int oy, char** board, WINDOW* w1) {
             break;
         case '@':
             player.hunger--;
+
             if(T > 0) {
                 //board[ox][oy] = '.';
                 //mvprintw(ox, oy, ".");
-                mvprintw(0,0,"Opened the door with ancient key!");
+                player.x = ox;
+                player.y = oy;
+                mvprintw(1, 1, "                                                                           ");
+                mvprintw(1, 1,"Opened the door with ancient key!");
                 refresh();
+            }
+            else if(check >= 3) {
+                mvprintw(1, 1, "                                                                           ");
+                mvprintw(1, 1, "you can't open this door anymore");
+                attron(COLOR_PAIR(17));
+                mvprintw(player.x, player.y, "@");
+                attroff(COLOR_PAIR(17));
+                refresh();
+                player.x = ox;
+                player.y = oy;
             }
             else {
                 clear();
@@ -4781,6 +4808,8 @@ void print_character(int ox, int oy, char** board, WINDOW* w1) {
                     while (c != '0') {
                         c = getchar();
                     }
+                    player.x = ox;
+                    player.y = oy;
                     print_map(board);
                 }
                 else {
@@ -4789,7 +4818,6 @@ void print_character(int ox, int oy, char** board, WINDOW* w1) {
                     scanw("%d", &p);
                     if(p == room[flor][4].pass) {
                         print_map(board);
-                        mvprintw(1,0, "%d", room[flor][4].pass);
                         attron(COLOR_PAIR(8));
                         mvprintw(player.x, player.y, "@");
                         attroff(COLOR_PAIR(8));
@@ -4800,7 +4828,6 @@ void print_character(int ox, int oy, char** board, WINDOW* w1) {
                     else {
                         check++;
                         print_map(board);
-                        mvprintw(1,0, "%d", room[flor][4].pass);
                         if(check == 1) {
                             attron(COLOR_PAIR(13));
                             mvprintw(player.x, player.y, "@");
@@ -4810,6 +4837,11 @@ void print_character(int ox, int oy, char** board, WINDOW* w1) {
                             attron(COLOR_PAIR(11));
                             mvprintw(player.x, player.y, "@");
                             attroff(COLOR_PAIR(11));
+                        }
+                        else if(check == 3) {
+                            attron(COLOR_PAIR(17));
+                            mvprintw(player.x, player.y, "@");
+                            attroff(COLOR_PAIR(17));
                         }
                         player.x = ox;
                         player.y = oy;
@@ -6748,6 +6780,20 @@ void save_info() {
     else if(karbar == 4) {
         FILE* f;
         f = fopen("info4", "w");
+        fprintf(f, "%d\n", player.health);
+        fprintf(f, "%d\n", player.score);
+        fprintf(f, "%d\n", player.gold);
+        fprintf(f, "%d\n", player.exp);
+        fprintf(f, "%d\n", player.color);
+        fprintf(f, "%d\n", player.x);
+        fprintf(f, "%d\n", player.y);
+        fprintf(f, "%d\n", player.hunger);
+        fprintf(f, "%s\n", player.weapon);
+        fclose(f);
+    }
+    else {
+        FILE* f;
+        f = fopen("info", "w");
         fprintf(f, "%d\n", player.health);
         fprintf(f, "%d\n", player.score);
         fprintf(f, "%d\n", player.gold);
